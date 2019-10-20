@@ -15,14 +15,15 @@ import {
 import { Link } from "react-router-dom";
 
 import "react-datepicker/dist/react-datepicker.css";
+import Moment from "react-moment";
 
 class Expenses extends Component {
   emptyItem = {
-    id: "103",
-    expensedate: new Date(),
     description: "",
+    expensedate: new Date(),
+    id: 104,
     location: "",
-    categories: [1, "Travel"]
+    category: { id: 1, name: "Travel" }
   };
 
   constructor(props) {
@@ -30,23 +31,55 @@ class Expenses extends Component {
 
     this.state = {
       date: new Date(),
-      isLoading: true,
+      isLoading: false,
       Categories: [],
       Expenses: [],
       item: this.emptyItem
     };
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleDateChange = this.handleDateChange.bind(this);
+  }
+
+  handleDateChange(date) {
+    let item = { ...this.state.item };
+    item.expensedate = date;
+    this.setState({ item });
+  }
+
+  handleChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+    let item = { ...this.state.item };
+    item[name] = value;
+    this.setState({ item });
+  }
+
+  async handleSubmit(event) {
+    const item = this.state.item;
+    await fetch(`/api/expenses`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(item)
+    });
+    event.preventDefault();
+    this.props.history.push("/expenses");
   }
 
   async remove(id) {
     await fetch(`/api/expenses/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        Accept: "application/json",
+        "Content-Type": "application/json"
       }
     }).then(() => {
       let updatedExpenses = [...this.state.Expenses].filter(i => i.id !== id);
-      this.setState({Expenses: updatedExpenses});
+      this.setState({ Expenses: updatedExpenses });
     });
   }
 
@@ -68,10 +101,12 @@ class Expenses extends Component {
     if (isLoading) return <div>Loading...</div>;
 
     let rows = Expenses.map(expense => (
-      <tr>
+      <tr key={expense.id}>
         <td>{expense.description}</td>
         <td>{expense.location}</td>
-        <td>{expense.expensedate}</td>
+        <td>
+          <Moment date={expense.expensedate} format="YYYY/MM/DD" />
+        </td>
         <td>{expense.category.name}</td>
         <td>
           <Button
@@ -86,40 +121,34 @@ class Expenses extends Component {
     ));
 
     let optionList = Categories.map(category => (
-      <option id={category.id}>{category.name}</option>
+      <option value={category.id} key={category.id}>{category.name}</option>
     ));
 
     return (
       <div className="App">
         <Container>
-          <Form>
+          <Form onSubmit={this.handleSubmit}>
             {title}
             <FormGroup>
-              <Label for="title">Title</Label>
+              <Label for="description">Title</Label>
               <Input
                 type="text"
-                name="title"
-                id="title"
+                name="description"
+                id="description"
                 onChange={this.handleChange}
-                autoComplete="name"
+                autoComplete="description"
               />
             </FormGroup>
 
             <FormGroup>
               <Label for="category">Category</Label>
-              <select>{optionList}</select>
-              <Input
-                type="text"
-                name="category"
-                id="category"
-                onChange={this.handleChange}
-              />
+              <select onChange={this.handleChange}>{optionList}</select>
             </FormGroup>
 
             <FormGroup>
               <Label for="expenseDate">Expense Date</Label>
               <DatePicker
-                selected={this.state.date}
+                selected={this.state.item.expensedate}
                 onChange={this.handleDateChange}
               />
             </FormGroup>
