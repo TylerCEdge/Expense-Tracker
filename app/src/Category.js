@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import AppNav from "./AppNav";
 
 class Category extends Component {
   state = {
@@ -16,7 +17,8 @@ class Category extends Component {
     const { Categories, isLoading } = this.state;
     if (isLoading) return <div>Loading...</div>;
     return (
-      <div>
+      <div className="App">
+        <AppNav />
         <h2>Categories</h2>
         {Categories.map(category => (
           <div id={category.id}>{category.name}</div>

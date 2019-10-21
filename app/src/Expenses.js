@@ -13,7 +13,6 @@ import {
   FormGroup
 } from "reactstrap";
 import { Link } from "react-router-dom";
-
 import "react-datepicker/dist/react-datepicker.css";
 import Moment from "react-moment";
 
@@ -121,11 +120,14 @@ class Expenses extends Component {
     ));
 
     let optionList = Categories.map(category => (
-      <option value={category.id} key={category.id}>{category.name}</option>
+      <option value={category.id} key={category.id}>
+        {category.name}
+      </option>
     ));
 
     return (
       <div className="App">
+        <AppNav />
         <Container>
           <Form onSubmit={this.handleSubmit}>
             {title}
@@ -141,12 +143,12 @@ class Expenses extends Component {
             </FormGroup>
 
             <FormGroup>
-              <Label for="category">Category</Label>
+              <Label for="category">Category</Label><br />
               <select onChange={this.handleChange}>{optionList}</select>
             </FormGroup>
 
             <FormGroup>
-              <Label for="expenseDate">Expense Date</Label>
+              <Label for="expenseDate">Expense Date</Label><br />
               <DatePicker
                 selected={this.state.item.expensedate}
                 onChange={this.handleDateChange}
